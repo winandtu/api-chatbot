@@ -5,8 +5,8 @@ import * as path from 'path';
 import * as Papa from 'papaparse';
 import axios from 'axios';
 import { Product } from './interfaces/product.interface';
-import { CurrencyConversionResult } from './interfaces/currency.interfase';
-import { ExchangeRatesResponse } from './interfaces/currency.interfase';
+import { CurrencyConversionResult } from './interfaces/currency.interface';
+import { ExchangeRatesResponse } from './interfaces/currency.interface';
 
 @Injectable()
 export class ToolsService {
@@ -22,7 +22,7 @@ export class ToolsService {
    */
   private loadProducts() {
     try {
-      // Change this line to point to the correct path
+
       const csvPath = path.join(process.cwd(), 'src', 'products_list.csv');
 
       const csvContent = fs.readFileSync(csvPath, 'utf8');
@@ -111,9 +111,9 @@ export class ToolsService {
 
         // Special logic for gift searches
         if (searchTerm.includes('present') || searchTerm.includes('gift') || searchTerm.includes('regalo')) {
-          // For gifts, prefer items that are more universal or appropriate
-          if (productType.includes('home')) score += 5; // Home items can be good gifts
-          if (title.includes('safely') || title.includes('detergent')) score += 3; // Practical gifts
+          // For gifts, prefer items that are more universal
+          if (productType.includes('home')) score += 5; // Home items
+          if (title.includes('safely') || title.includes('detergent')) score += 3;
         }
 
         return { product, score };

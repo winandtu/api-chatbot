@@ -30,7 +30,7 @@ export class ChatbotService {
     try {
       this.logger.log(`Processing user query: "${userQuery}"`);
 
-      // Step 1: First call to LLM with available functions
+      // Call to LLM with available functions
       const firstResponse = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
@@ -96,7 +96,7 @@ export class ChatbotService {
 
       const message = firstResponse.choices[0].message;
 
-      // Step 2: Check if function was called
+      // Check if function was called
       if (message.function_call) {
         const functionName = message.function_call.name;
         const functionArgs = JSON.parse(message.function_call.arguments);
@@ -105,7 +105,7 @@ export class ChatbotService {
 
         let functionResult: any;
 
-        // Step 3: Execute the appropriate function
+        // Execute the appropriate function
         if (functionName === 'searchProducts') {
           const products = this.toolsService.searchProducts(functionArgs.query);
           functionResult = products.map(product => ({
@@ -117,9 +117,8 @@ export class ChatbotService {
             variants: product.variants,
           }));
 
-          // Check if user query mentions currency conversion
-          // Example: "What is the price of this phone in EUR?"
-          // Define keywords to match for price/cost queries
+          // Check if user query mentions currency conversion - Example: "What is the price of this phone in EUR?"
+          // Define keywords for price/cost queries
           const priceKeywords = 'price|cost|costs|expensive|fee|fees|charge|charges';
           // Build a flexible regex using the keywords
           const currencyMatch = userQuery.match(new RegExp(`(?:${priceKeywords}).*in\\s+([A-Z]{3})`, 'i'));
@@ -130,7 +129,7 @@ export class ChatbotService {
                 functionResult.map(async product => {
                   const convertedPrice = await this.toolsService.convertCurrencies(
                     product.price,
-                    'USD', // Assuming the base price is in USD
+                    'USD', // base price in USD
                     targetCurrency,
                   );
                   return {
@@ -163,7 +162,7 @@ export class ChatbotService {
             functionResult = { error: 'Currency conversion failed. Please try again.' };
           }
         }
-        // Step 4: Second call to LLM with function result
+        // Second call to LLM with function result
         const secondResponse = await this.openai.chat.completions.create({
           model: 'gpt-3.5-turbo',
           messages: [
